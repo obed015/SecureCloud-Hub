@@ -37,3 +37,24 @@ output "entra_service_principal_id" {
   description = "Object ID of the Entra service principal"
   value       = azuread_service_principal.securecloud.object_id
 }
+
+output "function_app_name" {
+  description = "Function App name"
+  value       = azurerm_linux_function_app.main.name
+}
+
+output "function_app_hostname" {
+  description = "Function App hostname"
+  value       = azurerm_linux_function_app.main.default_hostname
+}
+
+output "function_app_principal_id" {
+  description = "Function App managed identity principal ID"
+  value       = azurerm_linux_function_app.main.identity[0].principal_id
+}
+
+output "app_insights_connection_string" {
+  description = "Application Insights connection string"
+  value       = azurerm_application_insights.main.connection_string
+  sensitive   = true
+}

@@ -1,4 +1,4 @@
-location     = "uksouth"
+location     = "ukwest"
 environment  = "dev"
 project_name = "securecloud"
 

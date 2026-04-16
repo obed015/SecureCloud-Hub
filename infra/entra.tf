@@ -6,8 +6,8 @@ resource "azuread_application" "securecloud" {
 
   web {
     redirect_uris = [
-      "https://placeholder.azurewebsites.net/.auth/login/aad/callback"
-    ]
+    "https://func-securecloud-dev-v70vh.azurewebsites.net/.auth/login/aad/callback"
+]
 
     implicit_grant {
       access_token_issuance_enabled = false

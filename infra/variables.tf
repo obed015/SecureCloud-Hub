@@ -1,7 +1,7 @@
 variable "location" {
   description = "Azure region for all resources"
   type        = string
-  default     = "uksouth"
+  default     = "ukwest"
 }
 
 variable "environment" {
@@ -26,16 +26,4 @@ variable "tags" {
     managed_by  = "terraform"
     portfolio   = "true"
   }
-}
-
-variable "scan_function_principal_id" {
-  description = "Object ID of the scan function managed identity."
-  type        = string
-  default     = ""
-}
-
-variable "download_function_principal_id" {
-  description = "Object ID of the download function managed identity."
-  type        = string
-  default     = ""
 }
