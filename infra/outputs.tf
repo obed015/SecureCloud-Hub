@@ -27,3 +27,13 @@ output "storage_account_id" {
   description = "Storage account resource ID"
   value       = azurerm_storage_account.main.id
 }
+
+output "entra_app_client_id" {
+  description = "Client ID of the Entra ID app registration"
+  value       = azuread_application.securecloud.client_id
+}
+
+output "entra_service_principal_id" {
+  description = "Object ID of the Entra service principal"
+  value       = azuread_service_principal.securecloud.object_id
+}

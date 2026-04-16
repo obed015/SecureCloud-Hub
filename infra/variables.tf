@@ -27,3 +27,15 @@ variable "tags" {
     portfolio   = "true"
   }
 }
+
+variable "scan_function_principal_id" {
+  description = "Object ID of the scan function managed identity."
+  type        = string
+  default     = ""
+}
+
+variable "download_function_principal_id" {
+  description = "Object ID of the download function managed identity."
+  type        = string
+  default     = ""
+}
