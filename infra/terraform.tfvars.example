@@ -1,0 +1,11 @@
+location     = "uksouth"
+environment  = "dev"
+project_name = "securecloud"
+
+tags = {
+  project     = "securecloud-hub"
+  environment = "dev"
+  owner       = "obed-owusu"
+  managed_by  = "terraform"
+  portfolio   = "true"
+}

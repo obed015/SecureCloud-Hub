@@ -1,0 +1,29 @@
+# Terraform — never commit state or provider cache
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfplan
+override.tf
+override.tf.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Azure Functions local config — contains connection strings
+local.settings.json
+
+# Environment and secret files — NEVER commit
+.env
+*.env
+*.pem
+*.key
+*.pfx
+
+# OS
+.DS_Store
+Thumbs.db
