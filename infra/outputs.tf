@@ -17,3 +17,13 @@ output "tenant_id" {
   description = "Active Microsoft Entra tenant ID"
   value       = data.azurerm_client_config.current.tenant_id
 }
+
+output "storage_account_name" {
+  description = "Storage account name"
+  value       = azurerm_storage_account.main.name
+}
+
+output "storage_account_id" {
+  description = "Storage account resource ID"
+  value       = azurerm_storage_account.main.id
+}
