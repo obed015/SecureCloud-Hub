@@ -68,3 +68,13 @@ output "entra_app_object_id" {
   description = "Object ID of the Entra app registration"
   value       = azuread_application.securecloud.object_id
 }
+
+output "log_analytics_workspace_id" {
+  description = "Log Analytics workspace ID for KQL queries"
+  value       = azurerm_log_analytics_workspace.main.id
+}
+
+output "app_insights_name" {
+  description = "Application Insights resource name"
+  value       = azurerm_application_insights.main.name
+}
