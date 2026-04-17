@@ -28,6 +28,11 @@ output "storage_account_id" {
   value       = azurerm_storage_account.main.id
 }
 
+output "function_packages_container_name" {
+  description = "Container used for Flex Function App deployment packages"
+  value       = azurerm_storage_container.function_packages.name
+}
+
 output "entra_app_client_id" {
   description = "Client ID of the Entra ID app registration"
   value       = azuread_application.securecloud.client_id
@@ -40,17 +45,17 @@ output "entra_service_principal_id" {
 
 output "function_app_name" {
   description = "Function App name"
-  value       = azurerm_linux_function_app.main.name
+  value       = azapi_resource.flex_function_app.name
 }
 
 output "function_app_hostname" {
   description = "Function App hostname"
-  value       = azurerm_linux_function_app.main.default_hostname
+  value       = azapi_resource.flex_function_app.output.properties.defaultHostName
 }
 
 output "function_app_principal_id" {
   description = "Function App managed identity principal ID"
-  value       = azurerm_linux_function_app.main.identity[0].principal_id
+  value       = azapi_resource.flex_function_app.output.identity.principalId
 }
 
 output "app_insights_connection_string" {

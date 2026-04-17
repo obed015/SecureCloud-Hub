@@ -56,6 +56,12 @@ resource "azurerm_storage_container" "quarantine" {
   container_access_type = "private"
 }
 
+resource "azurerm_storage_container" "function_packages" {
+  name                  = "function-packages"
+  storage_account_id    = azurerm_storage_account.main.id
+  container_access_type = "private"
+}
+
 resource "azurerm_storage_management_policy" "lifecycle" {
   storage_account_id = azurerm_storage_account.main.id
 

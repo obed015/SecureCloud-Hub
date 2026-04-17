@@ -1,5 +1,7 @@
 import logging
 import os
+from datetime import datetime, timezone
+from urllib.parse import unquote, urlparse
 
 import azure.functions as func
 from azure.identity import DefaultAzureCredential
@@ -10,32 +12,69 @@ logger = logging.getLogger(__name__)
 EICAR_SIGNATURE = b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*"
 
 
+def get_required_env(name: str) -> str:
+    value = os.environ.get(name)
+    if not value:
+        raise ValueError(f"Missing required environment variable: {name}")
+    return value
+
+
 def scan_content(content: bytes) -> tuple[bool, str]:
     if EICAR_SIGNATURE in content:
         return False, "EICAR test signature detected"
     return True, "clean"
 
 
+def parse_blob_url(blob_url: str) -> tuple[str, str]:
+    if not blob_url:
+        raise ValueError("Event payload did not include blob URL")
+
+    parsed = urlparse(blob_url)
+
+    if not parsed.netloc.endswith(".blob.core.windows.net"):
+        raise ValueError(f"Unexpected blob host in URL: {blob_url}")
+
+    path = parsed.path.lstrip("/")
+    parts = path.split("/", 1)
+
+    if len(parts) != 2:
+        raise ValueError(f"Unable to parse container/blob from URL: {blob_url}")
+
+    source_container = parts[0]
+    blob_name = unquote(parts[1])
+
+    return source_container, blob_name
+
+
 def main(event: func.EventGridEvent) -> None:
     event_data = event.get_json()
     blob_url = event_data.get("url", "")
+    event_id = getattr(event, "id", "unknown")
 
-    logger.info("Scan triggered. blob_url=%s", blob_url)
+    logger.info("Scan triggered. event_id=%s blob_url=%s", event_id, blob_url)
 
-    try:
-        _, path = blob_url.split(".blob.core.windows.net/", 1)
-        source_container, blob_name = path.split("/", 1)
-    except (ValueError, AttributeError) as exc:
-        logger.error("Failed to parse blob URL. blob_url=%s error=%s", blob_url, str(exc))
-        return
+    incoming_container = get_required_env("INCOMING_CONTAINER")
+    safe_container = get_required_env("SAFE_CONTAINER")
+    quarantine_container = get_required_env("QUARANTINE_CONTAINER")
+    storage_url = get_required_env("STORAGE_ACCOUNT_URL")
 
-    incoming_container = os.environ["INCOMING_CONTAINER"]
-    safe_container = os.environ["SAFE_CONTAINER"]
-    quarantine_container = os.environ["QUARANTINE_CONTAINER"]
-    storage_url = os.environ["STORAGE_ACCOUNT_URL"]
+    source_container, blob_name = parse_blob_url(blob_url)
+
+    logger.info(
+        "Parsed event payload. event_id=%s source_container=%s blob_name=%s",
+        event_id,
+        source_container,
+        blob_name,
+    )
 
     if source_container != incoming_container:
-        logger.info("Ignoring blob outside incoming container. container=%s", source_container)
+        logger.warning(
+            "Ignoring blob outside incoming container. event_id=%s source_container=%s expected_container=%s blob_name=%s",
+            event_id,
+            source_container,
+            incoming_container,
+            blob_name,
+        )
         return
 
     credential = DefaultAzureCredential()
@@ -43,40 +82,71 @@ def main(event: func.EventGridEvent) -> None:
 
     source_client = blob_service.get_blob_client(container=incoming_container, blob=blob_name)
 
-    try:
-        content = source_client.download_blob().readall()
-    except Exception as exc:
-        logger.error("Failed to download blob. blob=%s error=%s", blob_name, str(exc))
-        return
+    logger.info(
+        "Attempting blob download. event_id=%s container=%s blob=%s",
+        event_id,
+        incoming_container,
+        blob_name,
+    )
+
+    content = source_client.download_blob().readall()
+
+    logger.info(
+        "Blob downloaded successfully. event_id=%s blob=%s bytes=%s",
+        event_id,
+        blob_name,
+        len(content),
+    )
 
     is_clean, reason = scan_content(content)
     destination_container = safe_container if is_clean else quarantine_container
     scan_status = "clean" if is_clean else "infected"
+
+    logger.info(
+        "Scan completed. event_id=%s blob=%s scan_status=%s reason=%s destination=%s",
+        event_id,
+        blob_name,
+        scan_status,
+        reason,
+        destination_container,
+    )
 
     destination_client = blob_service.get_blob_client(
         container=destination_container,
         blob=blob_name,
     )
 
-    try:
-        destination_client.upload_blob(
-            content,
-            overwrite=True,
-            metadata={"scanStatus": scan_status},
-        )
-        logger.info(
-            "Uploaded scanned blob. blob=%s destination=%s scan_status=%s reason=%s",
-            blob_name,
-            destination_container,
-            scan_status,
-            reason,
-        )
-    except Exception as exc:
-        logger.error("Failed to upload scanned blob. blob=%s error=%s", blob_name, str(exc))
-        return
+    metadata = {
+        "scanStatus": scan_status,
+        "scanReason": reason,
+        "scannedAtUtc": datetime.now(timezone.utc).isoformat(),
+    }
 
-    try:
-        source_client.delete_blob()
-        logger.info("Deleted original blob from incoming container. blob=%s", blob_name)
-    except Exception as exc:
-        logger.error("Failed to delete original blob. blob=%s error=%s", blob_name, str(exc))
+    logger.info(
+        "Uploading scanned blob. event_id=%s blob=%s destination=%s metadata=%s",
+        event_id,
+        blob_name,
+        destination_container,
+        metadata,
+    )
+
+    destination_client.upload_blob(
+        content,
+        overwrite=True,
+        metadata=metadata,
+    )
+
+    logger.info(
+        "Uploaded scanned blob successfully. event_id=%s blob=%s destination=%s",
+        event_id,
+        blob_name,
+        destination_container,
+    )
+
+    source_client.delete_blob()
+
+    logger.info(
+        "Deleted original blob from incoming container. event_id=%s blob=%s",
+        event_id,
+        blob_name,
+    )
