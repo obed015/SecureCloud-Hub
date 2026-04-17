@@ -22,6 +22,4 @@ terraform {
       version = "~> 2.3"
     }
   }
-
-  backend "local" {}
 }

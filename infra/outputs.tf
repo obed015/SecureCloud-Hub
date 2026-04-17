@@ -63,3 +63,8 @@ output "app_insights_connection_string" {
   value       = azurerm_application_insights.main.connection_string
   sensitive   = true
 }
+
+output "entra_app_object_id" {
+  description = "Object ID of the Entra app registration"
+  value       = azuread_application.securecloud.object_id
+}
