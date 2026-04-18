@@ -40,6 +40,10 @@ resource "azapi_resource" "flex_function_app" {
       siteConfig = {
         appSettings = [
           {
+            name  = "STORAGE_ACCOUNT_NAME"
+            value = azurerm_storage_account.main.name
+          },
+          {
             name  = "STORAGE_ACCOUNT_URL"
             value = "https://${azurerm_storage_account.main.name}.blob.core.windows.net"
           },
@@ -66,6 +70,10 @@ resource "azapi_resource" "flex_function_app" {
           {
             name  = "AzureWebJobsStorage__accountName"
             value = azurerm_storage_account.main.name
+          },
+          {
+            name  = "UPLOAD_SAS_EXPIRY_MINUTES"
+            value = "10"
           }
         ]
       }

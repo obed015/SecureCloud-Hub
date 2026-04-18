@@ -8,6 +8,8 @@
 # - container_access_type = "private" blocks anonymous reads
 # - versioning + soft delete protect against mistakes
 # - lifecycle policies control cost and cleanup
+# - CORS allows the authenticated frontend hosted on the Function App
+#   to upload directly to Blob Storage using short-lived SAS URLs
 # ============================================================
 
 resource "azurerm_storage_account" "main" {
@@ -32,6 +34,16 @@ resource "azurerm_storage_account" "main" {
 
     container_delete_retention_policy {
       days = 30
+    }
+
+    cors_rule {
+      allowed_origins = [
+        "https://${azapi_resource.flex_function_app.output.properties.defaultHostName}"
+      ]
+      allowed_methods = ["GET", "PUT", "OPTIONS"]
+      allowed_headers = ["*"]
+      exposed_headers = ["*"]
+      max_age_in_seconds = 3600
     }
   }
 
