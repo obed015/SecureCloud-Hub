@@ -38,11 +38,11 @@ resource "azurerm_storage_account" "main" {
 
     cors_rule {
       allowed_origins = [
-        "https://${azapi_resource.flex_function_app.output.properties.defaultHostName}"
+        "https://${local.function_app_name}.azurewebsites.net"
       ]
-      allowed_methods = ["GET", "PUT", "OPTIONS"]
-      allowed_headers = ["*"]
-      exposed_headers = ["*"]
+      allowed_methods    = ["GET", "PUT", "OPTIONS"]
+      allowed_headers    = ["*"]
+      exposed_headers    = ["*"]
       max_age_in_seconds = 3600
     }
   }
