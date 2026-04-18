@@ -202,6 +202,10 @@ HTML = """<!DOCTYPE html>
     loadFiles();
   });
 
+  function safeBase64(value) {
+    return btoa(unescape(encodeURIComponent(value)));
+  }
+
   async function uploadFile() {
     const input = document.getElementById('file-input');
     const file = input.files[0];
@@ -279,6 +283,8 @@ HTML = """<!DOCTYPE html>
 
       list.innerHTML = '';
       data.files.forEach(file => {
+        const encodedId = safeBase64(file.fullName);
+
         const item = document.createElement('li');
         item.className = 'file-item';
         item.innerHTML = `
@@ -287,11 +293,11 @@ HTML = """<!DOCTYPE html>
             <div class="file-meta">
               ${formatSize(file.size)} · ${formatDate(file.lastModified)}
             </div>
-            <div id="link-${btoa(file.fullName)}"></div>
+            <div id="link-${encodedId}"></div>
           </div>
           <div style="display:flex;align-items:center">
             <span class="scan-badge">✓ Clean</span>
-            <button class="btn-secondary" onclick="getDownloadLink('${escapeHtml(file.fullName)}', '${btoa(file.fullName)}')">
+            <button class="btn-secondary" onclick="getDownloadLink('${escapeHtml(file.name)}', '${encodedId}')">
               Get link
             </button>
           </div>
@@ -304,12 +310,12 @@ HTML = """<!DOCTYPE html>
     }
   }
 
-  async function getDownloadLink(fullName, encodedName) {
+  async function getDownloadLink(fileName, encodedName) {
     const container = document.getElementById('link-' + encodedName);
     container.innerHTML = '<span style="font-size:0.75rem;color:#63b3ed">Generating secure link...</span>';
 
     try {
-      const res = await fetch('/api/download?fileName=' + encodeURIComponent(fullName));
+      const res = await fetch('/api/download?fileName=' + encodeURIComponent(fileName));
       const text = await res.text();
 
       if (!res.ok) {
@@ -358,7 +364,11 @@ HTML = """<!DOCTYPE html>
   }
 
   function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 </script>
 </body>
