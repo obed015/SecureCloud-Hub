@@ -1,4 +1,4 @@
-# SecureCloud Hub — Zero-Trust Azure Secure File Sharing Platform
+# SecureCloud Hub-Zero-Trust Azure Secure File Sharing Platform
 
 SecureCloud Hub is a production-style Azure cloud security project that demonstrates how to build a zero-trust file sharing platform using Microsoft Entra ID, Azure Functions on Flex Consumption, private Blob Storage, Event Grid, managed identity, Terraform, and GitHub Actions with OIDC.
 
