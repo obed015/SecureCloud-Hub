@@ -6,151 +6,152 @@ It is designed to showcase practical Azure engineering skills for cloud, infrast
 
 ---
 
-## What this project does
+## Architecture Overview
 
-SecureCloud Hub implements a secure file sharing workflow that prevents unsafe files from being accessed and enforces strict identity and access control.
+### Enterprise Architecture
 
-### Core capabilities
-
-- Enforces Microsoft sign-in using Microsoft Entra ID and App Service Easy Auth
-- Keeps all Azure Blob Storage private with no public blob access
-- Processes uploads through an event-driven malware scanning workflow
-- Separates files into trusted and quarantined storage containers
-- Issues short-lived read-only SAS URLs only for verified clean files
-- Uses managed identity and RBAC instead of storage account keys
-- Deploys infrastructure using Terraform
-- Uses GitHub Actions with OIDC instead of long-lived client secrets
-- Logs runtime activity for audit, monitoring, and troubleshooting
-- Supports KQL-based investigation using Log Analytics and Application Insights
+![SecureCloud Hub Architecture](docs/architecture/securecloud-hub-architecture.webp)
 
 ---
 
-## Why this project exists
+## Project Summary
 
-SecureCloud Hub was built to demonstrate real-world Azure engineering practices rather than tutorial-style shortcuts.
+SecureCloud Hub demonstrates how to build a secure Azure-native file processing workflow using identity-first access controls, event-driven automation, Infrastructure as Code, and centralized observability.
 
-It is intended to show:
+The platform authenticates users with Microsoft Entra ID, securely uploads files using short-lived SAS tokens, scans uploads through an automated malware processing pipeline, isolates infected content, and only allows secure downloads for validated clean files.
 
-- secure Azure architecture design
-- identity-first zero-trust access control
-- event-driven cloud workflows
-- Infrastructure as Code with Terraform
-- CI/CD using federated authentication
-- observability, auditability, and KQL-based investigation
-- practical troubleshooting of real Azure platform issues
-
-This mirrors patterns used in:
-
-- Azure enterprise environments
-- regulated sectors
-- security-sensitive workloads
-- zero-trust cloud architectures
+The solution was designed to mirror enterprise cloud engineering and security patterns commonly used in regulated and zero-trust environments.
 
 ---
 
-## What has been built
+## Key Objectives
 
-SecureCloud Hub currently includes:
-
-- Azure Resource Group
-- Azure Storage Account with private containers only
-- `incoming-raw` container for untrusted uploads
-- `safe-files` container for clean files
-- `quarantine` container for infected files
-- Azure Function App on **Flex Consumption**
-- Microsoft Entra ID authentication via Easy Auth
-- System-assigned managed identity
-- RBAC-based storage access
-- Event Grid system topic and subscription
-- `scan_function` triggered by BlobCreated events
-- `download_function` for secure file access flow
-- Application Insights and Log Analytics integration
-- GitHub Actions pipeline foundation using OIDC
-- Terraform-managed infrastructure
-- Working malware pipeline validated with:
-  - clean file routing to `safe-files`
-  - EICAR test file routing to `quarantine`
+- Enforce identity-first secure file access
+- Prevent anonymous Blob Storage exposure
+- Process uploads through an event-driven malware pipeline
+- Isolate trusted and untrusted files
+- Generate short-lived secure download access
+- Centralize monitoring and audit visibility
+- Deploy infrastructure using Terraform and CI/CD
 
 ---
 
-## High-level architecture
+## Technologies Used
+
+- Azure Functions (Python)
+- Azure Blob Storage
+- Azure Event Grid
+- Microsoft Entra ID
+- App Service Easy Auth
+- Managed Identity + RBAC
+- Terraform
+- GitHub Actions
+- OpenID Connect (OIDC)
+- Application Insights
+- Log Analytics Workspace
+- KQL
+
+---
+
+## Core Features
+
+### Secure Authentication
+
+Microsoft Entra ID and Easy Auth enforce authenticated access to the platform before uploads or downloads can occur.
+
+### Direct-to-Blob Secure Uploads
+
+Authenticated users receive short-lived write SAS tokens allowing secure uploads directly into private Blob Storage containers.
+
+### Event-Driven Malware Processing
+
+BlobCreated events trigger the malware scanning workflow automatically using Azure Event Grid and Python Azure Functions.
+
+### Clean and Quarantine Separation
+
+Clean files are moved into the `safe-files` container while infected files are isolated into the `quarantine` container.
+
+### Secure Download Workflow
+
+The `download_function` validates:
+
+- authenticated identity
+- blob ownership
+- clean scan metadata
+
+before issuing a short-lived read-only SAS URL.
+
+### Monitoring and Audit Visibility
+
+Application Insights, Log Analytics, Function logs, and Storage diagnostics provide centralized observability across the environment.
+
+---
+
+## Architecture Layers
+
+- GitHub Actions OIDC Deployment Layer
+- Terraform Infrastructure Layer
+- Microsoft Entra ID Authentication Layer
+- Azure Functions Processing Layer
+- Blob Storage Security Layer
+- Event Grid Automation Layer
+- Malware Scanning Workflow
+- Monitoring and Observability Layer
+
+---
+
+## Deployment Evidence
+
+Deployment screenshots and architecture assets are stored in:
 
 ```text
-GitHub Actions (OIDC)
-        ↓
-Terraform IaC
-        ↓
-┌─────────────────────────────────────────────────────┐
-│            rg-securecloud-dev-ukwest                │
-│                                                     │
-│  User → Entra ID / Easy Auth                        │
-│       → Azure Functions (Flex Consumption)          │
-│                                                     │
-│  Upload → incoming-raw                              │
-│         → Event Grid (BlobCreated)                  │
-│         → scan_function                             │
-│         → safe-files (clean)                        │
-│         → quarantine (infected)                     │
-│                                                     │
-│  Download request → download_function               │
-│                   → identity validation             │
-│                   → clean-file verification         │
-│                   → short-lived read-only SAS       │
-│                   → client downloads from Blob      │
-└─────────────────────────────────────────────────────┘
+docs/screenshots/
+docs/architecture/
+```
 
-## Security Decisions
+These include:
 
-| Decision | Why |
-|---------|-----|
-| Private blob containers | Prevents anonymous access |
-| Separate containers | Enforces trust boundaries |
-| Managed identity + RBAC | Removes connection strings |
-| Easy Auth with Entra ID | Blocks unauthenticated access |
-| Event Grid filtering | Prevents infinite loops |
-| User delegation SAS | Short-lived secure downloads |
-| OIDC CI/CD | Removes long-lived secrets |
-| Log Analytics + KQL | Enables auditing and investigation |
+- Event Grid trigger validation
+- Malware scan execution
+- Storage container separation
+- Application Insights traces
+- KQL investigation queries
+- GitHub Actions deployments
+- Terraform infrastructure deployment
+- Secure download validation
 
-## Key Workflows
+---
 
-### Upload and Scan
+## Live Project Walkthrough
 
-1. File uploaded to `incoming-raw`
-2. Event Grid triggers `scan_function`
-3. File scanned
-4. Clean → `safe-files`
-5. Infected → `quarantine`
-6. Metadata applied
-7. Original deleted
+Architecture Overview:
+[SecureCloud Hub Portfolio Page](https://oowusu.com/secure-cloud-hub.html?utm_source=chatgpt.com)
 
-### Secure Download
+Technical Deep Dive:
+[SecureCloud Hub Engineering Deep Dive](https://oowusu.com/secure-cloud-hub-engineering-deepdive.html?utm_source=chatgpt.com)
 
-1. Authenticated user requests file
-2. Identity validated via Easy Auth
-3. `scanStatus=clean` verified
-4. Short-lived SAS issued
-5. Client downloads directly
+---
 
-## Validation Completed
+## Deployment Approach
 
-The platform was tested using both clean and EICAR test files.
+Infrastructure was deployed using Terraform and GitHub Actions with OpenID Connect federation to enable secure, repeatable, passwordless Azure deployments without long-lived client secrets.
 
-Clean file:
-- moved to `safe-files`
-- tagged with `scanStatus=clean`
+---
 
-Infected file:
-- moved to `quarantine`
-- tagged with `scanStatus=infected`
+## Learning Outcomes
 
-## Troubleshooting Highlights
+- Zero-trust Azure architecture
+- Event-driven cloud workflows
+- Secure SAS delegation patterns
+- Azure Functions with Python
+- Terraform Infrastructure as Code
+- OIDC-based CI/CD pipelines
+- Managed Identity and RBAC
+- Azure monitoring and KQL investigation
+- Secure storage and malware isolation workflows
 
-During development, several real-world issues were resolved:
+---
 
-- Migrated Function App from Linux Consumption to Flex Consumption
-- Rebuilt Event Grid subscription after migration
-- Fixed delivery failures caused by Easy Auth blocking webhook traffic
-- Excluded Event Grid runtime paths from authentication
-- Improved logging for scan workflow diagnostics
-- Verified delivery using Event Grid metrics and Application Insights
+## License
+
+MIT License
