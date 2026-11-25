@@ -1,8 +1,8 @@
-# SecureCloud Hub-Zero-Trust Azure Secure File Sharing Platform
+# SecureCloud Hub — Zero-Trust Azure File Sharing Platform
 
-SecureCloud Hub is a production-style Azure cloud security project that demonstrates how to build a zero-trust file sharing platform using Microsoft Entra ID, Azure Functions on Flex Consumption, private Blob Storage, Event Grid, managed identity, Terraform, and GitHub Actions with OIDC.
+SecureCloud Hub is a personal Azure cloud engineering project built using production-style infrastructure, security and deployment practices.
 
-It is designed to showcase practical Azure engineering skills for cloud, infrastructure, DevOps, and security-focused roles.
+The platform combines Microsoft Entra ID, Azure Functions on Flex Consumption, Azure Blob Storage, Event Grid, managed identities, Terraform and GitHub Actions with OIDC to demonstrate secure file sharing and automated file processing in Azure..
 
 ---
 
@@ -16,11 +16,13 @@ It is designed to showcase practical Azure engineering skills for cloud, infrast
 
 ## Project Summary
 
-SecureCloud Hub demonstrates how to build a secure Azure-native file processing workflow using identity-first access controls, event-driven automation, Infrastructure as Code, and centralized observability.
+SecureCloud Hub is a personal Azure cloud engineering project that demonstrates how to build a secure Azure-native file processing workflow using identity-first access controls, event-driven automation, Infrastructure as Code, and centralised observability.
 
-The platform authenticates users with Microsoft Entra ID, securely uploads files using short-lived SAS tokens, scans uploads through an automated malware processing pipeline, isolates infected content, and only allows secure downloads for validated clean files.
+The platform authenticates users with Microsoft Entra ID, securely uploads files using short-lived SAS tokens, processes uploads through an automated malware detection workflow, isolates files flagged as infected, and restricts downloads to files classified as clean.
 
-The solution was designed to mirror enterprise cloud engineering and security patterns commonly used in regulated and zero-trust environments.
+The infrastructure is provisioned using Terraform and deployed through GitHub Actions using passwordless Azure authentication with OpenID Connect (OIDC).
+
+The solution was built in my personal Azure tenant to explore and implement enterprise cloud engineering and security patterns commonly used in regulated and zero-trust environments.
 
 ---
 
