@@ -127,10 +127,10 @@ These include:
 ## Live Project Walkthrough
 
 Architecture Overview:
-[SecureCloud Hub Portfolio Page](https://oowusu.com/secure-cloud-hub.html?utm_source=chatgpt.com)
+https://oowusu.com/projects/securecloud-hub
 
 Technical Deep Dive:
-[SecureCloud Hub Engineering Deep Dive](https://oowusu.com/secure-cloud-hub-engineering-deepdive.html?utm_source=chatgpt.com)
+https://oowusu.com/projects/securecloud-hub/deep-dive
 
 ---
 
